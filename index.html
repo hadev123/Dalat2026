@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đà Lạt 2026 Planner - Artistic & Drive Support</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --primary: #2d5a27;
+        --accent: #d4a373;
+        --bg-soft: #f0f4f0;
+      }
+
+      body {
+        font-family: "Be Vietnam Pro", sans-serif;
+        background: linear-gradient(
+          135deg,
+          #f8fafc 0%,
+          #eef2f3 50%,
+          #e2e8f0 100%
+        );
+        background-attachment: fixed;
+        scroll-behavior: smooth;
+      }
+
+      /* Họa tiết trang trí chìm */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+        opacity: 0.4;
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      .pine-decoration {
+        position: fixed;
+        font-size: 15rem;
+        color: rgba(45, 90, 39, 0.03);
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      .font-serif {
+        font-family: "Playfair Display", serif;
+      }
+
+      .activity-card {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+      }
+      .activity-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      }
+
+      #editor-panel {
+        display: none;
+        height: calc(100vh - 80px);
+      }
+      .is-editing #editor-panel {
+        display: block;
+        z-index: 60;
+      }
+      .is-editing #preview-panel {
+        width: 66.666%;
+        margin-left: 33.333%;
+      }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+
+      @keyframes rotate-disk {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .music-playing {
+        animation: rotate-disk 5s linear infinite;
+      }
+
+      .glass-nav {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(15px);
+      }
+
+      @media print {
+        .no-print {
+          display: none;
+        }
+        #preview-panel {
+          width: 100% !important;
+          margin: 0 !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="text-slate-800">
+    <!-- Trang trí nền -->
+    <i class="fas fa-tree pine-decoration top-[-5%] left-[-5%] rotate-12"></i>
+    <i
+      class="fas fa-mountain pine-decoration bottom-[-5%] right-[-5%] -rotate-12"
+    ></i>
+
+    <!-- Music Toggle -->
+    <div class="fixed bottom-4 right-4 z-50">
+      <button
+        onclick="toggleMusic()"
+        class="flex items-center gap-2 bg-white/90 backdrop-blur p-2 md:p-3 rounded-full shadow-xl hover:scale-110 transition"
+      >
+        <div
+          id="music-disk"
+          class="w-9 h-9 md:w-10 md:h-10 bg-green-800 text-white rounded-full flex items-center justify-center"
+        >
+          <i class="fas fa-music"></i>
+        </div>
+        <span
+          id="music-status"
+          class="hidden md:block text-xs font-bold text-slate-600"
+        >
+          Bật nhạc chill
+        </span>
+      </button>
+      <audio id="bg-music" loop>
+        <source
+          src="https://res.cloudinary.com/dpqknp0mo/video/upload/v1766503552/videoplayback_ekqqo5.mp4"
+          type="audio/mpeg"
+        />
+      </audio>
+    </div>
+
+    <div id="main-container" class="flex transition-all duration-500">
+      <div
+        id="editor-panel"
+        class="fixed left-0 top-20 w-1/3 bg-slate-900 p-4 border-r border-slate-700 overflow-hidden"
+      >
+        <textarea
+          id="json-input"
+          class="w-full h-full bg-slate-950 text-blue-300 font-mono text-xs p-5 rounded-xl border border-slate-800 focus:outline-none"
+        ></textarea>
+      </div>
+
+      <div
+        id="preview-panel"
+        class="w-full min-h-screen p-4 md:p-10 mx-auto max-w-6xl transition-all duration-500"
+      >
+        <!-- Team Section -->
+        <div class="mb-20 pt-10">
+          <div class="text-center mb-12 relative">
+            <div
+              class="absolute inset-0 flex items-center justify-center -z-10"
+            >
+              <span
+                class="text-8xl font-serif italic text-slate-200/50 select-none"
+                >Dalat Trip</span
+              >
+            </div>
+            <span
+              class="text-[10px] text-green-700 font-black uppercase tracking-[0.4em] mb-2 block"
+              >Đà Lạt 2026</span
+            >
+            <h2 class="font-serif text-5xl text-slate-900 italic font-bold">
+              Thiên Lý Ơiii
+            </h2>
+          </div>
+
+          <div
+            id="team-container"
+            class="flex flex-wrap justify-center gap-10 items-end"
+          ></div>
+        </div>
+
+        <!-- Stats -->
+        <div
+          id="hero-stats"
+          class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
+        ></div>
+
+        <!-- Tabs -->
+        <div class="sticky top-4 z-40 mb-16">
+          <div
+            id="day-tabs"
+            class="flex gap-3 overflow-x-auto no-scrollbar bg-white/80 backdrop-blur-xl px-4 py-3 rounded-2xl shadow-md border border-white/50"
+          >
+            <!-- Tabs render bằng JS -->
+          </div>
+        </div>
+
+        <!-- Itinerary -->
+        <div id="itinerary-list" class="space-y-24 mb-24"></div>
+
+        <!-- Budget Summary -->
+        <div
+          id="budget-summary"
+          class="bg-white/60 backdrop-blur-xl rounded-[4rem] p-8 md:p-16 shadow-2xl border border-white/50 mb-24"
+        >
+          <h2
+            class="font-serif text-5xl text-slate-900 italic font-bold mb-12 text-center"
+          >
+            Tổng Chi Phí Các Mục
+          </h2>
+          <div
+            id="budget-grid"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          ></div>
+          <div
+            class="mt-16 p-10 bg-gradient-to-r from-green-900 to-green-800 rounded-[3rem] text-white flex flex-col md:flex-row justify-between items-center gap-8 shadow-2xl"
+          >
+            <div>
+              <p
+                class="text-green-300 text-xs font-bold uppercase tracking-widest mb-2"
+              >
+                Dự kiến mỗi người
+              </p>
+              <p class="text-5xl font-serif italic" id="total-cost-display">
+                ~ 0 VNĐ
+              </p>
+            </div>
+            <div class="text-right hidden md:block">
+              <i class="fas fa-mountain text-6xl text-green-700/50"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Image -->
+        <div
+          class="mt-24 rounded-3xl md:rounded-[4rem] overflow-hidden h-[300px] md:h-[500px] relative shadow-xl"
+        >
+          <img
+            id="footer-image"
+            src=""
+            class="w-full h-full object-cover scale-105"
+          />
+          <div
+            class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-center justify-center"
+          >
+            <h2
+              class="font-serif italic text-4xl md:text-6xl text-white font-bold"
+            >
+              Let's gooo
+            </h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let autoPlayed = false;
+
+      function tryAutoPlayMusic() {
+        if (autoPlayed) return;
+
+        const music = document.getElementById("bg-music");
+        const disk = document.getElementById("music-disk");
+        const status = document.getElementById("music-status");
+
+        music
+          .play()
+          .then(() => {
+            disk.classList.add("music-playing");
+            status.innerText = "Đang phát nhạc";
+            autoPlayed = true;
+          })
+          .catch(() => {
+            // browser chưa cho → bỏ qua
+          });
+      }
+
+      ["click", "scroll", "touchstart", "keydown"].forEach((evt) => {
+        window.addEventListener(evt, tryAutoPlayMusic, { once: true });
+      });
+
+      // Hàm chuyển đổi link Google Drive mạnh mẽ
+      function transformDriveUrl(url) {
+        if (!url) return "https://via.placeholder.com/800x600?text=No+Image";
+        if (url.includes("drive.google.com")) {
+          let fileId = "";
+          const matchD = url.match(/\/d\/([^\/]+)/);
+          if (matchD) fileId = matchD[1];
+          const matchId = url.match(/id=([^&]+)/);
+          if (matchId) fileId = matchId[1];
+          if (fileId)
+            return `https://lh3.googleusercontent.com/d/${fileId}=w1000`;
+        }
+        return url;
+      }
+
+      const initialData = {
+        total: "7,859,800 VNĐ",
+        footerImg:
+          "https://drive.google.com/file/d/1E_MGlNVnajskGqxNQwGtVlEaG2OOwUgR/view?usp=sharing",
+        team: {
+          leader: {
+            name: "Lê Hoàng Anh",
+            role: "Trưởng đoàn",
+            img: "https://drive.google.com/file/d/1u12ajKHj20G-uMHQJSyHZC0s3siY6XKj/view?usp=sharing",
+          },
+          members: [
+            {
+              name: "Nguyễn Ngọc Lâm",
+              role: "Ăn, ngủ, chơi",
+              img: "https://drive.google.com/file/d/1uXv7IvL53Fd1qk4JYbJc1SUpV6HApQjA/view?usp=sharing",
+            },
+            {
+              name: "Vy Khánh Minh",
+              role: "Ăn, ngủ, chơi",
+              img: "https://drive.google.com/file/d/1aeLgNDKnWA6gH8s3JwzGKWqoG3KUvuAq/view?usp=sharing",
+            },
+            {
+              name: "Nguyễn Thanh Thu",
+              role: "Ăn, ngủ, chơi",
+              img: "https://drive.google.com/file/d/1DPt5fLO9H83R16d_OWfqmzVXqpnGFjEk/view?usp=sharing",
+            },
+            {
+              name: "Lê Bảo Ngọc",
+              role: "Ăn, ngủ, chơi",
+              img: "https://drive.google.com/file/d/1_JjrJ62d_5eiaBJG9X62cDRgeWGgDaBm/view?usp=sharing",
+            },
+            {
+              name: "Trương Thuỳ Linh",
+              role: "Ăn, ngủ, chơi",
+              img: "https://drive.google.com/file/d/1x7q1kIoQ-mv-COxbBREsl4kObCVWJuHk/view?usp=sharing",
+            },
+          ],
+        },
+        categories: [
+          {
+            name: "Máy bay",
+            amount: "3,559,800 VNĐ",
+            icon: "fa-plane",
+            desc: "Vietjet & Vietnam Airlines",
+          },
+          {
+            name: "Khách sạn",
+            amount: "970,000 VNĐ",
+            icon: "fa-hotel",
+            desc: "4 đêm nghỉ",
+          },
+          {
+            name: "Xe máy & Xăng",
+            amount: "300,000 VNĐ",
+            icon: "fa-motorcycle",
+            desc: "Thuê 3 xe + Xăng xe",
+          },
+          {
+            name: "Ô tô & Taxi",
+            amount: "840,000 VNĐ",
+            icon: "fa-car-side",
+            desc: "Xe Lado 7 chỗ, xe đưa đón sân bay",
+          },
+          {
+            name: "Ăn uống",
+            amount: "1,300,000 VNĐ",
+            icon: "fa-utensils",
+            desc: "Sáng, trưa, tối, cafe, kem bơ",
+          },
+          {
+            name: "Vé tham quan",
+            amount: "890,000 VNĐ",
+            icon: "fa-ticket",
+            desc: "Mongo, Lumiere, Săn mây, Datanla, Dinh 3",
+          },
+        ],
+        days: [
+          {
+            day: "Ngày 1",
+            date: "01/01/2026",
+            title: "Khởi hành",
+            activities: [
+              {
+                time: "16:00",
+                icon: "fa-plane",
+                title: "Bay HN - Đà Lạt",
+                note: "Vietjet Air",
+                detail: "Di chuyển ra sân bay (Ô tô) + Xe Lado về KS (Ô tô)",
+                cost: "1.911.800",
+                image:
+                  "https://static.vinwonders.com/production/doi-ten-ve-may-bay-vietnam-airlines-1.jpg?w=1000",
+              },
+              {
+                time: "19:45",
+                icon: "fa-motorcycle",
+                title: "Ăn Cà ri Chàaa",
+                note: "32 Đường Ánh Sáng",
+                detail: "Di chuyển bằng Xe máy. Check-in tháp Vinaphone",
+                cost: "100.000",
+                image:
+                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSEgqbPtNDk2zNHJS5chSxLiDTFNrtIKZVFQ&s?w=1000",
+              },
+            ],
+          },
+          {
+            day: "Ngày 2",
+            date: "02/01",
+            title: "Đi nàooo",
+            activities: [
+              {
+                time: "07:30 - 08:00",
+                type: "eat",
+                icon: "fa-motorcycle",
+                title: "Ăn sáng bánh mỳ xíu mại",
+                note: "Bánh mì Xíu mại 79 Gốc - Đường Thông Thiên Học",
+                detail: "Di chuyển bằng Xe máy.",
+                cost: "50.000",
+                image:
+                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWwD2bb0--qEtB0bznIvkkh5xD_l4UVTwA1Q&s?w=1000",
+              },
+              {
+                time: "08:00 - 11:30",
+                type: "play",
+                icon: "fa-car-side",
+                title: "Mongo Land",
+                note: "Xe ô tô đưa đón (Bao gồm vé + xe).",
+                detail: "Di chuyển bằng Ô tô đưa đón tận nơi.",
+                cost: "500.000",
+                image:
+                  "https://agotourist.com/wp-content/uploads/2022/08/tro-choi-truot-phao-kho-tai-mongo-land.jpg?w=1000",
+              },
+              {
+                time: "12:00 - 13:00",
+                type: "eat",
+                icon: "fa-motorcycle",
+                title: "Ăn trưa bánh căn",
+                note: "Bánh căn Nhà Chung",
+                detail: "Di chuyển bằng Xe máy.",
+                cost: "100.000",
+                image:
+                  "https://mia.vn/media/uploads/blog-du-lich/quan-banh-can-nha-chung-chi-co-trung-va-bot-nhung-nuoc-mam-nhung-lai-cuon-hut-la-ky-5-1634556503.jpg?w=1000",
+              },
+              {
+                time: "15:30 - 16:30",
+                type: "play",
+                icon: "fa-motorcycle",
+                title: "Quảng trường Lâm Viên",
+                note: "Trung tâm thành phố",
+                detail: "Di chuyển bằng Xe máy.",
+                cost: "10.000",
+                image:
+                  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRvwwk5bmcrzhNvIEfepCTmAb0QfwEWP5PJw&s?w=1000",
+              },
+              {
+                time: "16:30 - 17:30",
+                type: "play",
+                icon: "fa-motorcycle",
+                title: "Vườn ánh sáng Lumiera",
+                note: "Mai Anh Đào, Phường 8",
+                detail: "Di chuyển bằng Xe máy.",
+                cost: "150.000",
+                image:
+                  "https://mia.vn/media/uploads/blog-du-lich/vuon-anh-sang-lumiere-1-1761208262.jpg?w=1000",
+              },
+              {
+                time: "19:00 - 21:30",
+                type: "eat",
+                icon: "fa-motorcycle",
+                title: "Ăn tối Trạm Dừng Chill",
+                note: "111 Huỳnh Tấn Phát, Phường 11, Đà Lạt",
+                detail: "Di chuyển bằng Xe máy.",
+                cost: "250.000",
+                image:
+                  "https://xedulichdalat.vn/wp-content/uploads/2025/02/tiem-nuong-tram-dung-chill-6.jpg?w=1000",
+              },
+              {
+                time: "21:40 - 22:00",
+                type: "eat",
+                icon: "fa-motorcycle",
+                title: "Ăn sữa chua, kem bơ",
+                note: "Kem Bơ Đà Lạt - Kem Bơ Na Ri, 74C Nguyễn Văn Trỗi, Phường 2, Đà Lạt, Lâm Đồng",
+                detail: "Di chuyển bằng Xe máy.",
+                cost: "250.000",
+                image:
+                  "https://static.vinwonders.com/production/kem-bo-da-lat-so-4.jpg?w=1000",
+              },
+            ],
+          },
+          {
+            day: "Ngày 3",
+            date: "03/01",
+            title: "Chillnfree",
+            activities: [
+              {
+                time: "03:30 - 08:00",
+                icon: "fa-car-side",
+                title: "Săn mây Cầu Gỗ",
+                note: "Đón tại khách sạn, bao gồm tham quan và ăn sáng",
+                detail: "Di chuyển bằng Ô tô.",
+                cost: "180.000",
+                image:
+                  "https://latour.vn/upload/product/tour-san-may-don-binh-minh-da-lat-745.jpg?w=1000",
+              },
+              {
+                time: "12:00 - 14:00",
+                icon: "fa-car-side",
+                title: "Ăn trưa Pizza Củi",
+                note: " Pizza Củi - Võ Trường Toản (Cách Hotel 5km)",
+                detail: "Di chuyển bằng Ô tô.",
+                cost: "100.000",
+                image:
+                  "https://drive.google.com/file/d/1maB0r-hA7LxYNMdTt8GAsNDZF2_dp1gU/view?usp=sharing?w=1000",
+              },
+              {
+                time: "14:30 - 17:00",
+                icon: "fa-motorcycle",
+                title: "Cafe Miền Du Mục",
+                note: "Cafe Miền Du Mục Lâm Văn Thạnh. Gồm nước + xiên nướng (Cách Hotel 5km)",
+                detail: "Di chuyển bằng Xe máy.",
+                cost: "100.000",
+                image:
+                  "https://bizweb.dktcdn.net/thumb/large/100/492/259/files/514381872-122118959630887608-8297585516027723700-n.jpg?v=1753067468073?w=1000",
+              },
+              {
+                time: "17:30 - 18:00",
+                icon: "fa-motorcycle",
+                title: "Bánh Tráng nướng Dì Đinh",
+                note: "Bánh Tráng nướng Dì Đinh, 26 Đ. Hoàng Diệu, Phường 5",
+                detail: "Di chuyển bằng Xe máy.",
+                cost: "50.000",
+                image:
+                  "https://agotourist.com/wp-content/uploads/2018/08/Di-Dinh-banh-trang-nuong-mam-ruoc-da-lat.jpg.webp?w=1000",
+              },
+              {
+                time: "19:00 - 21:00",
+                icon: "fa-motorcycle",
+                title: "Lẩu gà lá é",
+                note: "Lẩu gá lá É - Số 7 Tô Hiến Thành (Linh không ăn được lá É và măng)",
+                detail: "Di chuyển bằng Xe máy.",
+                cost: "200.000",
+                image:
+                  "https://vietmaptravel.vn/wp-content/uploads/2025/04/lau-ga-la-e-da-lat-avt.jpeg?w=1000",
+              },
+            ],
+          },
+          {
+            day: "Ngày 4",
+            date: "04/01",
+            title: "Vượt thác",
+            activities: [
+              {
+                time: "08:30 - 09:00",
+                type: "play",
+                icon: "fa-motorcycle",
+                title: "Ăn sáng phở Atiso",
+                note: "ATISPHO - PHỞ ATISO ĐÀ LẠT CHÍNH GỐC, Khu Quy Hoạch/Lô H19-20 Đ. Phạm Hồng Thái, Phường 10",
+                detail: "Di chuyển bằng Xe máy",
+                cost: "60.000",
+                image:
+                  "https://drive.google.com/file/d/1EswCDkDj9Pt5A_S-ypRGopOGBJtF5MjD/view?usp=sharing?w=1000",
+              },
+              {
+                time: "09:30 - 11:30",
+                type: "play",
+                icon: "fa-car-side",
+                title: "Thác Datanla",
+                note: "Cách Hotel 7km",
+                detail: "Di chuyển bằng Ô tô",
+                cost: "200.000",
+                image:
+                  "https://agotourist.com/wp-content/uploads/2019/03/he-thong-mang-truot-tai-thac-datanla.jpg?w=1000",
+              },
+              {
+                time: "11:30 - 12:30",
+                type: "eat",
+                icon: "fa-car-side",
+                title: "Ăn trưa Suối bình yên",
+                note: "Cách Hotel 7km",
+                detail: "Di chuyển bằng Ô tô",
+                cost: "200.000",
+                image:
+                  "https://hoadalattravel.vn/wp-content/uploads/2024/11/suoi-binh-yen-da-lat-1.jpeg?w=1000",
+              },
+              {
+                time: "14:30 - 16:00",
+                type: "eat",
+                icon: "fa-motorcycle",
+                title: "Cafe Túi Mơ To",
+                note: "Cách Hotel 5km",
+                detail: "Di chuyển bằng Xe máy",
+                cost: "60.000",
+                image:
+                  "https://reviewvilla.vn/wp-content/uploads/2022/05/Tiem-ca-phe-tui-mo-to-2.jpg?w=1000",
+              },
+              {
+                time: "16:00 - 17:00",
+                type: "play",
+                icon: "fa-motorcycle",
+                title: "Dinh 3 Bảo Đại",
+                note: "Cách cafe 5km",
+                detail: "Di chuyển bằng Xe máy",
+                cost: "60.000",
+                image:
+                  "https://statics.vinpearl.com/dinh-3-da-lat-1_1701264397.jpg?w=1000",
+              },
+              {
+                time: "19:00 - 21:00",
+                type: "eat",
+                icon: "fa-motorcycle",
+                title: "Lẩu bò Ba Toa",
+                note: "Quán lẩu bò Dìn, Hẻm 8/1 Hẻm Hoàng Diệu, Phường 5, Đà Lạt, Lâm Đồng",
+                detail: "Di chuyển bằng Xe máy",
+                cost: "150.000",
+                image:
+                  "https://xedulichdalat.vn/wp-content/uploads/2023/10/quan-lau-bo-da-lat-2.jpg?w=1000",
+              },
+              {
+                time: "21:30 - 22:30",
+                type: "eat",
+                icon: "fa-motorcycle",
+                title: "Ăn kem bơ",
+                note: "CHẠM Cafe & Kem Bơ Đà Lạt, 8 Khu Hoà Bình, Phường 1, Đà Lạt, Lâm Đồng",
+                detail: "Di chuyển bằng Xe máy",
+                cost: "40.000",
+                image:
+                  "https://chamdalat.vn/wp-content/uploads/2024/05/Hinh-cover-Op1-scaled.jpg?w=1000",
+              },
+            ],
+          },
+          {
+            day: "Ngày 5",
+            date: "05/01",
+            title: "Comeback home",
+            activities: [
+              {
+                time: "07:30 - 09:00",
+                type: "eat",
+                icon: "fa-motorcycle",
+                title: "Ăn sáng Bánh cuốn",
+                note: "Bánh cuốn Oh ngon quá - Kiot số 9 Nguyễn Đình Chiểu",
+                detail: "Di chuyển bằng Xe máy",
+                cost: "50.000",
+                image:
+                  "https://drive.google.com/file/d/1kGnFjf_AaXyXjZLQMSeHx06DbzQ_hzmV/view?usp=sharing",
+              },
+              {
+                time: "09:25",
+                type: "move",
+                icon: "fa-plane-arrival",
+                title: "Bay Đà Lạt - HN",
+                note: "Vietnam Airlines",
+                detail: "Xe ra sân bay ĐL (Ô tô) + Xe từ HN về nhà (Ô tô).",
+                cost: "1.868.000",
+                image:
+                  "https://static.vinwonders.com/production/doi-ten-ve-may-bay-vietnam-airlines-1.jpg?w=1000",
+              },
+            ],
+          },
+        ],
+      };
+
+      function toggleEditor() {
+        document.body.classList.toggle("is-editing");
+      }
+
+      function toggleMusic() {
+        const music = document.getElementById("bg-music");
+        const disk = document.getElementById("music-disk");
+        const status = document.getElementById("music-status");
+        if (music.paused) {
+          music.play();
+          disk.classList.add("music-playing");
+          status.innerText = "Đang phát nhạc";
+        } else {
+          music.pause();
+          disk.classList.remove("music-playing");
+          status.innerText = "Đã dừng nhạc";
+        }
+      }
+
+      function render(data) {
+        try {
+          // Team
+          let teamHtml = `
+                    <div class="flex flex-col items-center group">
+                        <div class="w-36 h-36 md:w-48 md:h-48 rounded-full border-4 border-green-800 p-1.5 mb-5 shadow-2xl bg-white overflow-hidden">
+                            <img src="${transformDriveUrl(
+                              data.team.leader.img
+                            )}" class="w-full h-full object-cover rounded-full">
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-xl mb-1">${
+                          data.team.leader.name
+                        }</h3>
+                        <span class="text-[10px] bg-green-800 text-white px-4 py-1.5 rounded-full uppercase font-black">${
+                          data.team.leader.role
+                        }</span>
+                    </div>
+                `;
+          data.team.members.forEach((member) => {
+            teamHtml += `
+                        <div class="flex flex-col items-center group">
+                            <div class="w-24 h-24 md:w-28 md:h-28 rounded-full border-2 border-white p-1 mb-4 shadow-xl bg-white overflow-hidden">
+                                <img src="${transformDriveUrl(
+                                  member.img
+                                )}" class="w-full h-full object-cover rounded-full filter transition-all duration-700">
+                            </div>
+                            <h4 class="font-bold text-slate-700 text-sm mb-1">${
+                              member.name
+                            }</h4>
+                            <span class="text-[9px] text-slate-500 uppercase font-bold">${
+                              member.role
+                            }</span>
+                        </div>
+                    `;
+          });
+          document.getElementById("team-container").innerHTML = teamHtml;
+
+          // Stats
+          document.getElementById("hero-stats").innerHTML = `
+                    <div class="bg-white/60 backdrop-blur-md p-6 rounded-[2rem] border border-white/50 shadow-sm"><span class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-3 block">Ngân sách</span><p class="text-2xl font-serif font-bold text-green-800 italic">${
+                      data.total
+                    }</p></div>
+                    <div class="bg-white/60 backdrop-blur-md p-6 rounded-[2rem] border border-white/50 shadow-sm"><span class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-3 block">Khách</span><p class="text-2xl font-bold text-slate-800">${
+                      1 + data.team.members.length
+                    } Người</p></div>
+                    <div class="bg-white/60 backdrop-blur-md p-6 rounded-[2rem] border border-white/50 shadow-sm"><span class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-3 block">Lịch trình</span><p class="text-2xl font-bold text-slate-800">5 Ngày 4 Đêm</p></div>
+                    <div class="bg-green-800/90 backdrop-blur-md p-6 rounded-[2rem] shadow-xl text-white"><span class="text-[10px] text-green-300 font-black uppercase tracking-widest mb-3 block">Khởi hành</span><p class="text-2xl font-serif italic">${
+                      data.days[0].date
+                    }</p></div>
+                `;
+
+          // Tabs & Activities
+          let tabsHtml = "",
+            contentHtml = "";
+          data.days.forEach((day, idx) => {
+            tabsHtml += `<button onclick="document.getElementById('day-${idx}').scrollIntoView({behavior:'smooth'})" class="flex-shrink-0 px-8 py-3.5 rounded-2xl bg-white/60 backdrop-blur-md border border-white/40 text-slate-600 font-bold text-sm hover:bg-green-800 hover:text-white transition-all">${day.day}</button>`;
+            let activitiesHtml = day.activities
+              .map(
+                (act) => `
+                        <div class="bg-white/70 backdrop-blur-md rounded-[3rem] overflow-hidden border border-white/50 shadow-sm activity-card flex flex-col md:flex-row">
+                            <div class="w-full md:w-80 h-64 md:h-auto overflow-hidden"><img src="${transformDriveUrl(
+                              act.image
+                            )}" class="w-full h-full object-cover"></div>
+                            <div class="flex-1 p-10">
+                                <div class="flex items-center gap-5 mb-5">
+                                    <span class="px-5 py-2 rounded-full text-xs font-black bg-orange-600 text-white shadow-md">${
+                                      act.time
+                                    }</span>
+                                    <i class="fas ${
+                                      act.icon
+                                    } text-2xl text-green-800"></i>
+                                </div>
+                                <h4 class="text-2xl font-bold text-slate-900 mb-3">${
+                                  act.title
+                                }</h4>
+                                <p class="text-slate-600 text-sm mb-3">${
+                                  act.note || ""
+                                }</p>
+                                <p class="text-slate-400 text-xs italic border-l-4 border-green-800/20 pl-4">${
+                                  act.detail || ""
+                                }</p>
+                                <div class="mt-8 pt-6 border-t border-slate-200/50 text-green-800 font-bold">
+                                    <span class="bg-green-100/50 px-5 py-2 rounded-xl"><i class="fas fa-coins mr-3 opacity-50"></i>${
+                                      act.cost
+                                    } VNĐ</span>
+                                </div>
+                            </div>
+                        </div>
+                    `
+              )
+              .join("");
+            contentHtml += `<section id="day-${idx}" class="scroll-mt-48"><div class="mb-10 pl-6 border-l-[6px] border-green-800"><h2 class="font-serif text-5xl text-slate-900 italic font-bold">${day.day}: ${day.title}</h2></div><div class="grid gap-12">${activitiesHtml}</div></section>`;
+          });
+          document.getElementById("day-tabs").innerHTML = tabsHtml;
+          document.getElementById("itinerary-list").innerHTML = contentHtml;
+
+          // Budget & Footer
+          document.getElementById("budget-grid").innerHTML = data.categories
+            .map(
+              (cat) => `
+                    <div class="p-8 rounded-[2.5rem] border border-white/50 bg-white/40 backdrop-blur-sm">
+                        <div class="w-14 h-14 rounded-2xl bg-green-800 shadow-lg flex items-center justify-center text-white mb-6"><i class="fas ${cat.icon} text-2xl"></i></div>
+                        <h5 class="font-bold text-slate-800 text-xl mb-2">${cat.name}</h5>
+                        <p class="text-green-800 font-black text-2xl mb-3">${cat.amount}</p>
+                        <p class="text-slate-500 text-sm">${cat.desc}</p>
+                    </div>
+                `
+            )
+            .join("");
+          document.getElementById("total-cost-display").innerText =
+            "~ " + data.total;
+          document.getElementById("footer-image").src = transformDriveUrl(
+            data.footerImg
+          );
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      const editor = document.getElementById("json-input");
+      editor.value = JSON.stringify(initialData, null, 4);
+      editor.addEventListener("input", (e) => {
+        try {
+          render(JSON.parse(e.target.value));
+        } catch (err) {}
+      });
+      render(initialData);
+    </script>
+  </body>
+</html>
