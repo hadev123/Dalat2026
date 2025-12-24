@@ -64,6 +64,7 @@
         background: rgba(255, 255, 255, 0.8);
         backdrop-filter: blur(10px);
       }
+
       .activity-card:hover {
         transform: translateY(-8px);
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
@@ -73,14 +74,17 @@
         display: none;
         height: calc(100vh - 80px);
       }
+
       .is-editing #editor-panel {
         display: block;
         z-index: 60;
       }
+
       .is-editing #preview-panel {
         width: 66.666%;
         margin-left: 33.333%;
       }
+
       .no-scrollbar::-webkit-scrollbar {
         display: none;
       }
@@ -89,10 +93,12 @@
         from {
           transform: rotate(0deg);
         }
+
         to {
           transform: rotate(360deg);
         }
       }
+
       .music-playing {
         animation: rotate-disk 5s linear infinite;
       }
@@ -106,6 +112,7 @@
         .no-print {
           display: none;
         }
+
         #preview-panel {
           width: 100% !important;
           margin: 0 !important;
@@ -113,6 +120,7 @@
       }
     </style>
   </head>
+
   <body class="text-slate-800">
     <!-- Trang trí nền -->
     <i class="fas fa-tree pine-decoration top-[-5%] left-[-5%] rotate-12"></i>
@@ -188,6 +196,85 @@
           ></div>
         </div>
 
+        <div
+          id="weather-widget"
+          class="mb-10 bg-white/40 backdrop-blur-xl rounded-[3rem] p-8 border border-white/50 shadow-lg relative overflow-hidden"
+        >
+          <div
+            class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8 relative z-10"
+          >
+            <div class="flex items-center gap-6">
+              <div id="weather-icon" class="text-6xl text-slate-700">
+                <i class="fas fa-cloud-sun"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <span
+                    class="w-2 h-2 bg-green-500 rounded-full animate-ping"
+                  ></span>
+                  <span
+                    class="text-[10px] text-green-800 font-black uppercase tracking-widest"
+                    >Đà Lạt Live</span
+                  >
+                </div>
+                <div class="flex items-baseline gap-3">
+                  <span
+                    id="temp-display"
+                    class="text-6xl font-serif italic font-bold text-slate-900"
+                    >--°</span
+                  >
+                  <span
+                    id="weather-desc"
+                    class="text-lg text-slate-500 italic capitalize"
+                    >Đang tải...</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="flex gap-8 text-right border-l border-slate-300/30 pl-8"
+            >
+              <div>
+                <p class="text-[9px] text-slate-400 font-black uppercase mb-1">
+                  Độ ẩm
+                </p>
+                <p id="humidity" class="text-xl font-bold text-slate-700">
+                  --%
+                </p>
+              </div>
+              <div>
+                <p class="text-[9px] text-slate-400 font-black uppercase mb-1">
+                  Gió
+                </p>
+                <p id="wind-speed" class="text-xl font-bold text-slate-700">
+                  -- km/h
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="relative z-10 border-t border-slate-200/50 pt-6">
+            <div
+              id="hourly-forecast"
+              class="flex gap-8 overflow-x-auto pb-2 scrollbar-hide"
+              style="scrollbar-width: none; -ms-overflow-style: none"
+            ></div>
+          </div>
+
+          <i
+            class="fas fa-wind absolute right-[-20px] bottom-[-20px] text-9xl text-slate-100/50 -rotate-12 pointer-events-none"
+          ></i>
+
+          <div
+            id="weather-advice"
+            class="mt-6 pt-4 border-t border-slate-200/50 text-[14px] text-green-800 italic flex items-center justify-center gap-2"
+          >
+            <i class="fas fa-magic"></i>
+            <span>Đang tính toán trang phục phù hợp cho bạn...</span>
+          </div>
+        </div>
+
         <!-- Stats -->
         <div
           id="hero-stats"
@@ -201,6 +288,70 @@
             class="flex gap-3 overflow-x-auto no-scrollbar bg-white/80 backdrop-blur-xl px-4 py-3 rounded-2xl shadow-md border border-white/50"
           >
             <!-- Tabs render bằng JS -->
+          </div>
+        </div>
+
+        <!-- Nơi ở -->
+        <div
+          class="mb-10 bg-white/40 backdrop-blur-xl rounded-[3rem] p-6 border border-white/50 shadow-lg overflow-hidden relative group"
+        >
+          <div class="flex flex-col md:flex-row gap-8 items-center">
+            <div
+              class="w-full md:w-1/3 h-48 rounded-[2rem] overflow-hidden shadow-inner relative"
+            >
+              <img
+                id="hotel-image"
+                src="https://cdn1.ivivu.com/newcdn/fowardimage?url=https://pix8.agoda.net/hotelImages/55256505/-1/0f9e0c2706e0b63656a2ec27922e29cb.jpg?ce=0&s=312x"
+                alt="Accommodation"
+                class="w-full h-full object-cover group-hover:scale-110 transition duration-700"
+              />
+              <div
+                class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider text-green-800 shadow-sm"
+              >
+                <i class="fas fa-home mr-1"></i> Ở đây
+              </div>
+            </div>
+
+            <div class="flex-1 text-center md:text-left">
+              <h3
+                id="hotel-name"
+                class="font-serif text-3xl italic font-bold text-slate-900 mb-2"
+              >
+                Greenview City Hotel
+              </h3>
+              <p
+                id="hotel-address"
+                class="text-slate-500 text-sm mb-4 flex items-center justify-center md:justify-start gap-2 italic"
+              >
+                <i class="fas fa-map-marker-alt text-red-400"></i>
+                52 Khe Sanh, Phường 10, Đà Lạt, Lâm Đồng
+              </p>
+
+              <div class="flex flex-wrap justify-center md:justify-start gap-4">
+                <div
+                  class="bg-white/50 px-4 py-2 rounded-2xl border border-white/50"
+                >
+                  <p class="text-[9px] text-slate-400 font-black uppercase">
+                    Check-in
+                  </p>
+                  <p class="font-bold text-slate-700 text-sm">01/01 - 14:00</p>
+                </div>
+                <div
+                  class="bg-white/50 px-4 py-2 rounded-2xl border border-white/50"
+                >
+                  <p class="text-[9px] text-slate-400 font-black uppercase">
+                    Check-out
+                  </p>
+                  <p class="font-bold text-slate-700 text-sm">05/01 - 12:00</p>
+                </div>
+                <a
+                  href="https://maps.app.goo.gl/gFZRUAPg8jHZS6EX8"
+                  class="bg-green-800/90 hover:bg-green-900 text-white px-6 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 self-center"
+                >
+                  <i class="fas fa-directions"></i> Đường đến khách sạn
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -303,6 +454,94 @@
         return url;
       }
 
+      async function fetchDalatWeather() {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=11.94&longitude=108.44&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code&timezone=Asia%2FBangkok&forecast_days=2`;
+
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+          const current = data.current;
+          const temp = Math.round(current.temperature_2m);
+
+          // 1. Cập nhật số liệu hiện tại
+          document.getElementById("temp-display").innerText = `${temp}°`;
+          document.getElementById(
+            "humidity"
+          ).innerText = `${current.relative_humidity_2m}%`;
+          document.getElementById("wind-speed").innerText = `${Math.round(
+            current.wind_speed_10m
+          )} km/h`;
+
+          const weatherMap = {
+            0: { desc: "Trời trong", icon: "fa-sun", col: "text-orange-400" },
+            1: { desc: "Ít mây", icon: "fa-cloud-sun", col: "text-slate-400" },
+            3: { desc: "Nhiều mây", icon: "fa-cloud", col: "text-slate-500" },
+            45: { desc: "Sương mù", icon: "fa-smog", col: "text-gray-400" },
+            61: {
+              desc: "Mưa nhẹ",
+              icon: "fa-cloud-rain",
+              col: "text-blue-400",
+            },
+          };
+
+          const status = weatherMap[current.weather_code] || {
+            desc: "Bình thường",
+            icon: "fa-cloud-sun",
+            col: "text-slate-400",
+          };
+          document.getElementById("weather-desc").innerText = status.desc;
+          document.getElementById(
+            "weather-icon"
+          ).innerHTML = `<i class="fas ${status.icon} ${status.col}"></i>`;
+
+          // 2. Logic Nhắc mang áo (Advice)
+          let advice = "Thời tiết tuyệt vời để dạo phố!";
+          if (temp < 16) {
+            advice =
+              "Lạnh lắm, nhớ mang theo áo phao hoặc áo khoác thật dày nhé!";
+          } else if (temp < 20) {
+            advice =
+              "Trời se lạnh đặc trưng Đà Lạt, một chiếc Cardigan hay Blazer là chuẩn bài!";
+          } else if (temp > 25) {
+            advice =
+              "Hơi nắng ấm, mặc đồ mỏng nhẹ và đừng quên bôi kem chống nắng nha!";
+          }
+          document.getElementById(
+            "weather-advice"
+          ).innerHTML = `<i class="fas fa-magic"></i> <span>${advice}</span>`;
+
+          // 3. Cập nhật dự báo theo giờ
+          const hourlyContainer = document.getElementById("hourly-forecast");
+          hourlyContainer.innerHTML = "";
+          const nowHour = new Date().getHours();
+
+          for (let i = nowHour; i < nowHour + 12; i++) {
+            // Lấy 12 tiếng tiếp theo cho gọn
+            const time = new Date(data.hourly.time[i]);
+            const hourLabel = i === nowHour ? "Bây giờ" : `${time.getHours()}h`;
+            const hTemp = Math.round(data.hourly.temperature_2m[i]);
+            const hCode = data.hourly.weather_code[i];
+
+            let hIcon = "fa-sun";
+            if (hCode > 0 && hCode <= 3) hIcon = "fa-cloud-sun";
+            if (hCode >= 51) hIcon = "fa-cloud-showers-heavy";
+
+            hourlyContainer.innerHTML += `
+                <div class="flex flex-col items-center gap-3 min-w-[55px] group">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">${hourLabel}</span>
+                    <i class="fas ${hIcon} text-slate-500 text-base"></i>
+                    <span class="text-base font-serif italic font-bold text-slate-800">${hTemp}°</span>
+                </div>
+            `;
+          }
+        } catch (e) {
+          console.log("Lỗi cập nhật thời tiết");
+        }
+      }
+
+      // Gọi hàm khi trang load
+      fetchDalatWeather();
+
       const initialData = {
         total: "7,859,800 VNĐ",
         footerImg:
@@ -394,9 +633,10 @@
                 cost: "1.911.800",
                 image:
                   "https://media-cdn-v2.laodong.vn/storage/newsportal/2024/7/23/1370297/Vietjet-122.jpg?w=1000",
+                map: "https://maps.app.goo.gl/8wH6qrLfnJRSrFdn6",
               },
               {
-                time: "19:45",
+                time: "19:45 - 22:00",
                 icon: "fa-motorcycle",
                 title: "Ăn Cà ri Chàaa",
                 note: "32 Đường Ánh Sáng",
@@ -404,6 +644,7 @@
                 cost: "100.000",
                 image:
                   "https://drive.google.com/file/d/1OJ84eEemI4m7CX7688VLZQ6-r2tuImhx/view?usp=sharing?w=1000",
+                map: "https://maps.app.goo.gl/nv97PL4AeEg36d1TA",
               },
             ],
           },
@@ -422,6 +663,7 @@
                 cost: "50.000",
                 image:
                   "https://drive.google.com/file/d/1WwWLXdvkpw-ESnEkw2NRC5CtBCftqYsY/view?usp=sharing?w=1000",
+                map: "https://maps.app.goo.gl/CtAZ5e2cQ2JjZTkEA",
               },
               {
                 time: "08:00 - 11:30",
@@ -433,6 +675,7 @@
                 cost: "500.000",
                 image:
                   "https://agotourist.com/wp-content/uploads/2022/08/tro-choi-truot-phao-kho-tai-mongo-land.jpg?w=1000",
+                map: "https://maps.app.goo.gl/B9qNvWc9ZsXodHzf6",
               },
               {
                 time: "12:00 - 13:00",
@@ -444,6 +687,7 @@
                 cost: "100.000",
                 image:
                   "https://mia.vn/media/uploads/blog-du-lich/quan-banh-can-nha-chung-chi-co-trung-va-bot-nhung-nuoc-mam-nhung-lai-cuon-hut-la-ky-5-1634556503.jpg?w=1000",
+                map: "https://maps.app.goo.gl/BpzyXFY6nse1PwRJA",
               },
               {
                 time: "15:30 - 16:30",
@@ -455,6 +699,7 @@
                 cost: "10.000",
                 image:
                   "https://statics.vinpearl.com/quang-truong-lam-vien-2_1689511749.jpeg?w=1000",
+                map: "https://maps.app.goo.gl/Yz82iEp3nnoArB6v8",
               },
               {
                 time: "16:30 - 17:30",
@@ -466,6 +711,7 @@
                 cost: "150.000",
                 image:
                   "https://mia.vn/media/uploads/blog-du-lich/vuon-anh-sang-lumiere-1-1761208262.jpg?w=1000",
+                map: "https://maps.app.goo.gl/TnuvsvucmmjPWmX99",
               },
               {
                 time: "19:00 - 21:30",
@@ -477,6 +723,7 @@
                 cost: "250.000",
                 image:
                   "https://xedulichdalat.vn/wp-content/uploads/2025/02/tiem-nuong-tram-dung-chill-6.jpg?w=1000",
+                map: "https://maps.app.goo.gl/FhGL64haHxDPRHdq8",
               },
               {
                 time: "21:40 - 22:00",
@@ -488,6 +735,7 @@
                 cost: "250.000",
                 image:
                   "https://static.vinwonders.com/production/kem-bo-da-lat-so-4.jpg?w=1000",
+                map: "https://maps.app.goo.gl/bfHXX8tHMsZP4kW28",
               },
             ],
           },
@@ -510,11 +758,12 @@
                 time: "12:00 - 14:00",
                 icon: "fa-car-side",
                 title: "Ăn trưa Pizza Củi",
-                note: " Pizza Củi - Võ Trường Toản (Cách Hotel 5km)",
+                note: "Pizza Củi - Võ Trường Toản (Cách Hotel 5km)",
                 detail: "Di chuyển bằng Ô tô.",
                 cost: "100.000",
                 image:
                   "https://drive.google.com/file/d/1maB0r-hA7LxYNMdTt8GAsNDZF2_dp1gU/view?usp=sharing?w=1000",
+                map: "https://maps.app.goo.gl/yarLM2EivywDGpFy5",
               },
               {
                 time: "14:30 - 17:00",
@@ -525,6 +774,7 @@
                 cost: "100.000",
                 image:
                   "https://bizweb.dktcdn.net/thumb/large/100/492/259/files/514381872-122118959630887608-8297585516027723700-n.jpg?v=1753067468073?w=1000",
+                map: "https://maps.app.goo.gl/tq36AcU2BwmJ82gM8",
               },
               {
                 time: "17:30 - 18:00",
@@ -535,6 +785,7 @@
                 cost: "50.000",
                 image:
                   "https://agotourist.com/wp-content/uploads/2018/08/Di-Dinh-banh-trang-nuong-mam-ruoc-da-lat.jpg.webp?w=1000",
+                map: "https://maps.app.goo.gl/Nc4dyHci5dy96iSZ7",
               },
               {
                 time: "19:00 - 21:00",
@@ -545,6 +796,7 @@
                 cost: "200.000",
                 image:
                   "https://vietmaptravel.vn/wp-content/uploads/2025/04/lau-ga-la-e-da-lat-avt.jpeg?w=1000",
+                map: "https://maps.app.goo.gl/KxAGvd2MEPPpGmco7",
               },
             ],
           },
@@ -563,6 +815,7 @@
                 cost: "60.000",
                 image:
                   "https://drive.google.com/file/d/1EswCDkDj9Pt5A_S-ypRGopOGBJtF5MjD/view?usp=sharing?w=1000",
+                map: "https://maps.app.goo.gl/6ahLvaNwXhrMjR7j9",
               },
               {
                 time: "09:30 - 11:30",
@@ -574,6 +827,7 @@
                 cost: "200.000",
                 image:
                   "https://agotourist.com/wp-content/uploads/2019/03/he-thong-mang-truot-tai-thac-datanla.jpg?w=1000",
+                map: "https://maps.app.goo.gl/2gFA3zHom8YhYRAx7",
               },
               {
                 time: "11:30 - 12:30",
@@ -585,6 +839,7 @@
                 cost: "200.000",
                 image:
                   "https://hoadalattravel.vn/wp-content/uploads/2024/11/suoi-binh-yen-da-lat-1.jpeg?w=1000",
+                map: "https://maps.app.goo.gl/eV9vSJqTjDZidLWu8",
               },
               {
                 time: "14:30 - 16:00",
@@ -596,6 +851,7 @@
                 cost: "60.000",
                 image:
                   "https://reviewvilla.vn/wp-content/uploads/2022/05/Tiem-ca-phe-tui-mo-to-2.jpg?w=1000",
+                map: "https://maps.app.goo.gl/Q2Uca1f1qm2cE3ND6",
               },
               {
                 time: "16:00 - 17:00",
@@ -607,6 +863,7 @@
                 cost: "60.000",
                 image:
                   "https://statics.vinpearl.com/dinh-3-da-lat-1_1701264397.jpg?w=1000",
+                map: "https://maps.app.goo.gl/9bUViyhTQxKHb3bd9",
               },
               {
                 time: "19:00 - 21:00",
@@ -618,6 +875,7 @@
                 cost: "150.000",
                 image:
                   "https://xedulichdalat.vn/wp-content/uploads/2023/10/quan-lau-bo-da-lat-2.jpg?w=1000",
+                map: "https://maps.app.goo.gl/1p8cHaqzySbWoMDQ6",
               },
               {
                 time: "21:30 - 22:30",
@@ -629,6 +887,7 @@
                 cost: "40.000",
                 image:
                   "https://chamdalat.vn/wp-content/uploads/2024/05/Hinh-cover-Op1-scaled.jpg?w=1000",
+                map: "https://maps.app.goo.gl/1UHNX39BLJ8qb8Wq9",
               },
             ],
           },
@@ -647,6 +906,7 @@
                 cost: "50.000",
                 image:
                   "https://drive.google.com/file/d/1kGnFjf_AaXyXjZLQMSeHx06DbzQ_hzmV/view?usp=sharing",
+                map: "https://maps.app.goo.gl/b2Ra4uCKQorQ4mgy7",
               },
               {
                 time: "09:25",
@@ -658,6 +918,51 @@
                 cost: "1.868.000",
                 image:
                   "https://static.vinwonders.com/production/doi-ten-ve-may-bay-vietnam-airlines-1.jpg?w=1000",
+                map: "https://maps.app.goo.gl/crU72drNPEnDTivS7",
+              },
+            ],
+          },
+          ,
+          {
+            day: "Gợi ý",
+            date: "",
+            title: "những nơi khác",
+            activities: [
+              {
+                time: "Rảnh là đi",
+                type: "eat",
+                icon: "fa-motorcycle",
+                title: "Sữa đậu nành nóng",
+                note: "Sữa đậu nành nóng - 4 Hải Thượng",
+                detail: "Di chuyển bằng Xe máy",
+                cost: "0",
+                image:
+                  "https://dulichvnnet.vn/wp-content/uploads/2021/04/image007-750x500.jpg",
+                map: "https://maps.app.goo.gl/JRpt922exuaHjxEM9",
+              },
+              {
+                time: "Rảnh là đi",
+                type: "eat",
+                icon: "fa-motorcycle",
+                title: "Xưởng Bánh SweetHeart",
+                note: "Xưởng Bánh SweetHeart Đà Lạt, 27 Bis Đ. Hùng Vương, Phường Xuân Hương - cách ks 2km",
+                detail: "Di chuyển bằng Xe máy",
+                cost: "0",
+                image:
+                  "https://greenhilljsc.com/uploads/contents/images/454037593_122132580200311133_1211836740967865148_n.jpg",
+                map: "https://maps.app.goo.gl/NQTn6hX7zeZcaJLa8",
+              },
+              {
+                time: "Rảnh là đi",
+                type: "eat",
+                icon: "fa-motorcycle",
+                title: "Ăn gà nướng, cơm lam",
+                note: "CÔ SINH - gà nướng cơm lam, 86 Đ. Hùng Vương, Phường 9, Đà Lạt",
+                detail: "Di chuyển bằng Xe máy",
+                cost: "0",
+                image:
+                  "https://latour.vn/upload/user/images/b29/quan_co_sinh_mang_den_4.png",
+                map: "https://maps.app.goo.gl/r3czBHmrEqxpAx576",
               },
             ],
           },
@@ -754,6 +1059,12 @@
                                     <i class="fas ${
                                       act.icon
                                     } text-2xl text-green-800"></i>
+                                <a
+                                    href="${act.map}"
+                                    class="bg-green-800/90 hover:bg-green-900 text-white px-6 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 self-center"
+                                >
+                                    <i class="fas fa-directions"></i> Map điểm đến
+                                </a>
                                 </div>
                                 <h4 class="text-2xl font-bold text-slate-900 mb-3">${
                                   act.title
