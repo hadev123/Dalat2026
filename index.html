@@ -155,6 +155,184 @@
       </audio>
     </div>
 
+    <div class="fixed bottom-24 right-4 z-50">
+      <button
+        onclick="openExpenseModal()"
+        class="flex items-center gap-2 bg-white/90 backdrop-blur p-2 md:p-3 rounded-full shadow-xl hover:scale-110 transition"
+      >
+        <div
+          class="w-9 h-9 md:w-10 md:h-10 bg-orange-500 text-white rounded-full flex items-center justify-center"
+        >
+          <i class="fas fa-plus text-lg"></i>
+        </div>
+
+        <span class="hidden md:block text-xs font-bold text-slate-600">
+          Ghi chi tiêu
+        </span>
+      </button>
+    </div>
+
+    <div
+      id="expense-modal"
+      class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+        onclick="closeExpenseModal()"
+      ></div>
+
+      <div
+        class="relative bg-white rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl scale-in-center"
+      >
+        <div class="flex justify-between items-center mb-8">
+          <h3 class="font-serif text-3xl italic font-bold text-slate-900">
+            Chi tiêu thực
+          </h3>
+          <button
+            onclick="closeExpenseModal()"
+            class="text-slate-400 hover:text-slate-600 transition"
+          >
+            <i class="fas fa-times text-2xl"></i>
+          </button>
+        </div>
+
+        <div class="space-y-5">
+          <div>
+            <label
+              class="text-[10px] font-black uppercase text-slate-800 ml-2 mb-1 block"
+              >Thời gian</label
+            >
+            <input
+              type="text"
+              id="ex-time"
+              placeholder="Ví dụ: 01-01-2026"
+              class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-orange-500 outline-none transition"
+            />
+          </div>
+          <div>
+            <label
+              class="text-[10px] font-black uppercase text-slate-800 ml-2 mb-1 block"
+              >Người chi trả</label
+            >
+            <input
+              type="text"
+              id="ex-payer"
+              placeholder="Tên người trả..."
+              class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-orange-500 outline-none transition"
+            />
+          </div>
+          <div>
+            <label
+              class="text-[10px] font-black uppercase text-slate-800 ml-2 mb-1 block"
+              >Nội dung</label
+            >
+            <input
+              type="text"
+              id="ex-content"
+              placeholder="Về khoản gì"
+              class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-orange-500 outline-none transition"
+            />
+          </div>
+          <div>
+            <label
+              class="text-[10px] font-black uppercase text-slate-800 ml-2 mb-1 block"
+              >Số tiền (VNĐ)</label
+            >
+            <input
+              type="number"
+              id="ex-amount"
+              placeholder="Ví dụ: 500000"
+              class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-orange-500 outline-none transition font-bold text-orange-600"
+            />
+          </div>
+          <div>
+            <label
+              class="text-[10px] font-black uppercase text-slate-800 ml-2 mb-2 block"
+              >Người tham gia chia tiền:</label
+            >
+            <div
+              id="participant-list"
+              class="grid grid-cols-3 gap-2 bg-slate-50 p-4 rounded-2xl"
+            >
+              <label
+                class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  value="Anh"
+                  checked
+                  class="rounded text-orange-500 focus:ring-orange-500"
+                />
+                Hoàng Anh
+              </label>
+              <label
+                class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  value="Linh"
+                  checked
+                  class="rounded text-orange-500 focus:ring-orange-500"
+                />
+                Thuỳ Linh
+              </label>
+              <label
+                class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  value="Lâm"
+                  checked
+                  class="rounded text-orange-500 focus:ring-orange-500"
+                />
+                Ngọc Lâm
+              </label>
+              <label
+                class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  value="Ngọc"
+                  checked
+                  class="rounded text-orange-500 focus:ring-orange-500"
+                />
+                Bảo Ngọc
+              </label>
+              <label
+                class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  value="Thu"
+                  checked
+                  class="rounded text-orange-500 focus:ring-orange-500"
+                />
+                Thanh Thu
+              </label>
+              <label
+                class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  value="Minh"
+                  checked
+                  class="rounded text-orange-500 focus:ring-orange-500"
+                />
+                Khánh Minh
+              </label>
+            </div>
+          </div>
+
+          <button
+            onclick="addExpense()"
+            class="w-full bg-orange-500 hover:bg-orange-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-orange-200 transition-all mt-4"
+          >
+            Lưu
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div id="main-container" class="flex transition-all duration-500">
       <div
         id="editor-panel"
@@ -391,6 +569,58 @@
           </div>
         </div>
 
+        <!-- Bảng số tiền thực -->
+        <div
+          id="expense-section"
+          class="bg-white/60 backdrop-blur-xl rounded-[2rem] p-6 border border-white/50 shadow-xl overflow-hidden mb-20 relative"
+        >
+          <div
+            id="table-loading"
+            class="absolute inset-0 z-10 bg-white/40 backdrop-blur-[2px] hidden flex items-center justify-center transition-all duration-300"
+          >
+            <div class="flex flex-col items-center gap-3">
+              <i class="fas fa-spinner fa-spin text-orange-500 text-3xl"></i>
+              <span
+                class="text-[10px] font-black uppercase tracking-widest text-slate-500"
+                >Đang đồng bộ...</span
+              >
+            </div>
+          </div>
+
+          <h2
+            class="font-serif text-4xl text-slate-900 italic font-bold mb-8 text-center"
+          >
+            Chi tiêu thực
+          </h2>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr
+                  class="border-b border-slate-200 text-[11px] uppercase tracking-widest text-slate-800"
+                >
+                  <th class="py-4 px-2">STT</th>
+                  <th>Thời gian chi</th>
+                  <th>Tên người chi</th>
+                  <th>Nội dung chi</th>
+                  <th class="text-right">Số tiền chi</th>
+                  <th class="text-center px-4">#</th>
+                </tr>
+              </thead>
+
+              <tbody
+                id="expense-table-body"
+                class="font-medium text-[12px] text-slate-600"
+              ></tbody>
+
+              <tfoot
+                id="expense-footer"
+                class="border-t-2 border-slate-900"
+              ></tfoot>
+            </table>
+          </div>
+        </div>
+
         <!-- Footer Image -->
         <div
           class="mt-24 rounded-3xl md:rounded-[4rem] overflow-hidden h-[300px] md:h-[500px] relative shadow-xl"
@@ -406,7 +636,7 @@
             <h2
               class="font-serif italic text-4xl md:text-6xl text-white font-bold"
             >
-              Let's gooo
+              Let's gooo!!!
             </h2>
           </div>
         </div>
@@ -414,6 +644,265 @@
     </div>
 
     <script>
+      let expenses = [];
+
+      const SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbz4b2mwkhU733oxagVKpKkvLM2LKgSQtfn-0B6_BaWwA6fxIdTEfsMQfVzMuIHo4C8/exec";
+
+      // Hàm hiển thị/ẩn loading
+      function toggleTableLoading(show) {
+        const loader = document.getElementById("table-loading");
+        if (!loader) return;
+        if (show) {
+          loader.classList.remove("hidden");
+        } else {
+          loader.classList.add("hidden");
+        }
+      }
+
+      async function syncToGoogleSheets() {
+        toggleTableLoading(true); // BẬT LOADING
+        try {
+          await fetch(SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify(expenses),
+          });
+          console.log("Đã đồng bộ lên Google Sheets");
+        } catch (error) {
+          console.error("Lỗi đồng bộ:", error);
+        } finally {
+          setTimeout(() => toggleTableLoading(false), 500); // TẮT LOADING
+        }
+      }
+
+      // Form điền tiền thực
+      window.onload = async function () {
+        const savedData = localStorage.getItem("tripExpenses");
+        if (savedData) {
+          expenses = JSON.parse(savedData);
+          if (expenses.length > 0) {
+            document
+              .getElementById("expense-section")
+              .classList.remove("hidden");
+            updateExpenseTable();
+          }
+        }
+
+        // Khi kéo từ Cloud về cũng bật loading
+        if (expenses.length > 0) toggleTableLoading(true);
+
+        try {
+          const response = await fetch(SCRIPT_URL);
+          const cloudData = await response.json();
+          if (cloudData && cloudData.length > 0) {
+            expenses = cloudData;
+            localStorage.setItem("tripExpenses", JSON.stringify(expenses));
+            updateExpenseTable();
+            document
+              .getElementById("expense-section")
+              .classList.remove("hidden");
+          }
+        } catch (e) {
+          console.warn("Cloud trống");
+        } finally {
+          toggleTableLoading(false);
+        }
+      };
+
+      const groupMembers = ["Anh", "Linh", "Lâm", "Ngọc", "Thu", "Minh"];
+
+      function openExpenseModal() {
+        const modal = document.getElementById("expense-modal");
+        if (modal) {
+          modal.classList.remove("hidden");
+          document.getElementById("ex-time").focus();
+        }
+      }
+
+      function closeExpenseModal() {
+        const modal = document.getElementById("expense-modal");
+        if (modal) modal.classList.add("hidden");
+      }
+
+      async function addExpense() {
+        const time = document.getElementById("ex-time").value;
+        const payer = document.getElementById("ex-payer").value;
+        const content = document.getElementById("ex-content").value;
+        const amountInput = document.getElementById("ex-amount").value;
+        const amount = parseFloat(amountInput);
+
+        const checkboxes = document.querySelectorAll(
+          '#participant-list input[type="checkbox"]:checked'
+        );
+        const participants = Array.from(checkboxes).map((cb) => cb.value);
+
+        if (!time || !payer || isNaN(amount) || participants.length === 0) {
+          alert("Vui lòng nhập đủ thông tin nhé!");
+          return;
+        }
+
+        const perPersonForThis = amount / participants.length;
+
+        expenses.push({
+          time,
+          payer,
+          content,
+          amount,
+          participants,
+          perPerson: perPersonForThis,
+        });
+
+        // --- ƯU TIÊN CẬP NHẬT GIAO DIỆN TRƯỚC ---
+        document.getElementById("expense-section").classList.remove("hidden");
+        updateExpenseTable(); // Vẽ bảng ngay lập tức để người dùng thấy
+        closeExpenseModal();
+        document.getElementById("ex-amount").value = "";
+
+        // --- LƯU TRỮ SAU ---
+        localStorage.setItem("tripExpenses", JSON.stringify(expenses));
+        await syncToGoogleSheets(); // Đồng bộ ngầm lên Cloud
+      }
+
+      function updateExpenseTable() {
+        const tbody = document.getElementById("expense-table-body");
+        const tfoot = document.getElementById("expense-footer");
+        if (!tbody || !tfoot) return;
+
+        tbody.innerHTML = "";
+
+        let totalGroup = 0;
+        let individualDebts = {
+          Anh: 0,
+          Linh: 0,
+          Lâm: 0,
+          Ngọc: 0,
+          Thu: 0,
+          Minh: 0,
+        };
+
+        expenses.forEach((item, index) => {
+          // 1. Đảm bảo amount là số
+          const amount = parseFloat(item.amount) || 0;
+          totalGroup += amount;
+
+          // 2. Tính lại perPerson để đảm bảo không bị lấy giá trị cũ lỗi
+          // Chia cho số lượng participants, nếu không có ai thì chia 1 để tránh chia cho 0
+          const shareCount =
+            item.participants && item.participants.length > 0
+              ? item.participants.length
+              : 1;
+          const currentPerPerson = amount / shareCount;
+
+          // 3. Cộng dồn nợ cho từng người tham gia
+          if (item.participants) {
+            item.participants.forEach((p) => {
+              if (individualDebts.hasOwnProperty(p)) {
+                individualDebts[p] += currentPerPerson;
+              }
+            });
+          }
+
+          // 4. Vẽ hàng trong bảng
+          tbody.innerHTML += `
+            <tr class="border-b border-slate-100 group hover:bg-white/40 transition">
+                <td class="py-4 px-2 text-slate-600 text-[10px]">${
+                  index + 1
+                }</td>
+                <td class="text-xs font-bold text-slate-800">${
+                  item.time || ""
+                }</td>
+                <td class="text-sm font-black text-slate-800">${
+                  item.payer || ""
+                }</td>
+                <td class="text-xs text-slate-500">
+                    <div class="font-medium text-slate-800">${
+                      item.content || ""
+                    }</div>
+                    <div class="text-[10px] text-orange-600 font-bold uppercase">
+                        Cho: ${
+                          item.participants ? item.participants.join(", ") : ""
+                        }
+                    </div>
+                </td>
+                <td class="text-right font-bold text-orange-600">
+                    ${amount.toLocaleString()}đ
+                </td>
+                <td class="text-center px-4">
+                    <button onclick="deleteExpense(${index})" class="text-red-400 hover:text-red-600 transition">
+                        <i class="fas fa-trash-alt text-sm"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        });
+
+        // 5. Gọi hàm render footer (nhớ truyền các giá trị đã tính toán)
+        renderFooter(totalGroup, individualDebts, tfoot);
+      }
+
+      // Hàm xoá hàng
+      async function deleteExpense(index) {
+        if (confirm("Xóa nhé?")) {
+          expenses.splice(index, 1);
+
+          // Cập nhật giao diện ngay
+          updateExpenseTable();
+          if (expenses.length === 0) {
+            document.getElementById("expense-section").classList.add("hidden");
+          }
+
+          // Sau đó mới lưu và đồng bộ
+          localStorage.setItem("tripExpenses", JSON.stringify(expenses));
+          await syncToGoogleSheets();
+        }
+      }
+
+      // Hàm render footer riêng cho gọn (colspan bây giờ là 5)
+      function renderFooter(totalGroup, individualDebts, tfoot) {
+        // Kiểm tra nếu totalGroup không hợp lệ thì gán bằng 0
+        const safeTotal = isNaN(totalGroup) ? 0 : totalGroup;
+
+        let debtHtml = Object.keys(individualDebts)
+          .map((name) => {
+            // Ép kiểu số cho tiền nợ của từng người, nếu NaN thì hiện 0
+            const amount = isNaN(individualDebts[name])
+              ? 0
+              : individualDebts[name];
+
+            return `
+        <div class="flex justify-between items-center py-1 border-b border-orange-100 italic">
+            <span class="text-slate-800">${name}:</span>
+            <span class="font-bold text-slate-900">${Math.round(
+              amount
+            ).toLocaleString()}đ</span>
+        </div>
+      `;
+          })
+          .join("");
+
+        tfoot.innerHTML = `
+    <tr>
+        <td colspan="4" class="py-6 text-right font-serif italic text-xl text-slate-800 pr-10">
+            Tổng cộng:
+        </td>
+        <td colspan="2" class="py-6 text-right">
+             <span class="text-2xl text-orange-600 font-bold">${Math.round(
+               safeTotal
+             ).toLocaleString()}đ</span>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="6" class="bg-orange-50/50 rounded-3xl p-6">
+            <div class="text-[11px] font-black uppercase tracking-widest text-orange-800 mb-3 text-center">Số tiền mỗi người phải đóng</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">
+                ${debtHtml}
+            </div>
+        </td>
+    </tr>
+  `;
+      }
+
+      // Hàm play music
       let autoPlayed = false;
 
       function tryAutoPlayMusic() {
