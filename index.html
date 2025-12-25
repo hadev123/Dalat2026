@@ -572,7 +572,7 @@
         <!-- Bảng số tiền thực -->
         <div
           id="expense-section"
-          class="bg-white/60 backdrop-blur-xl rounded-[2rem] p-6 border border-white/50 shadow-xl overflow-hidden mb-20 relative"
+          class="scroll-mt-32 bg-white/60 backdrop-blur-xl rounded-[2rem] p-6 border border-white/50 shadow-xl overflow-hidden mb-20 relative"
         >
           <div
             id="table-loading"
@@ -780,29 +780,40 @@
           Minh: 0,
         };
 
+        let actualPaidFromPocket = {
+          Anh: 0,
+          Linh: 0,
+          Lâm: 0,
+          Ngọc: 0,
+          Thu: 0,
+          Minh: 0,
+        };
+
         expenses.forEach((item, index) => {
-          // 1. Đảm bảo amount là số
           const amount = parseFloat(item.amount) || 0;
           totalGroup += amount;
 
-          // 2. Tính lại perPerson để đảm bảo không bị lấy giá trị cũ lỗi
-          // Chia cho số lượng participants, nếu không có ai thì chia 1 để tránh chia cho 0
+          // Ghi nhận ai là người đã rút ví trả
+          if (actualPaidFromPocket.hasOwnProperty(item.payer)) {
+            actualPaidFromPocket[item.payer] += amount;
+          }
+
+          // Chia nợ cho những người tham gia
           const shareCount =
             item.participants && item.participants.length > 0
               ? item.participants.length
               : 1;
-          const currentPerPerson = amount / shareCount;
+          const perPerson = amount / shareCount;
 
-          // 3. Cộng dồn nợ cho từng người tham gia
           if (item.participants) {
             item.participants.forEach((p) => {
               if (individualDebts.hasOwnProperty(p)) {
-                individualDebts[p] += currentPerPerson;
+                individualDebts[p] += perPerson;
               }
             });
           }
 
-          // 4. Vẽ hàng trong bảng
+          // Vẽ hàng trong bảng
           tbody.innerHTML += `
             <tr class="border-b border-slate-100 group hover:bg-white/40 transition">
                 <td class="py-4 px-2 text-slate-600 text-[10px]">${
@@ -836,8 +847,8 @@
         `;
         });
 
-        // 5. Gọi hàm render footer (nhớ truyền các giá trị đã tính toán)
-        renderFooter(totalGroup, individualDebts, tfoot);
+        // Gọi hàm render footer (nhớ truyền các giá trị đã tính toán)
+        renderFooter(totalGroup, individualDebts, actualPaidFromPocket, tfoot);
       }
 
       // Hàm xoá hàng
@@ -858,48 +869,116 @@
       }
 
       // Hàm render footer riêng cho gọn (colspan bây giờ là 5)
-      function renderFooter(totalGroup, individualDebts, tfoot) {
-        // Kiểm tra nếu totalGroup không hợp lệ thì gán bằng 0
-        const safeTotal = isNaN(totalGroup) ? 0 : totalGroup;
+      function renderFooter(
+        totalGroup,
+        individualDebts,
+        actualPaidFromPocket,
+        tfoot
+      ) {
+        const PAID_BEFORE = 4529112; // Số tiền đã đóng (vé máy bay, phòng...)
+        const CASH_REMAINING = 4000000; // Số tiền mặt đóng thêm cho Anh
 
-        let debtHtml = Object.keys(individualDebts)
+        // Danh sách đầy đủ cho bảng chi phí
+        const allMembers = Object.keys(individualDebts);
+        // Danh sách 5 người cho bảng đối soát (Loại bỏ Anh)
+        const friends = allMembers.filter((name) => name !== "Anh");
+
+        // --- PHẦN 1: CHI PHÍ CÁ NHÂN (CÓ TÊN ANH) ---
+        let spendingHtml = allMembers
           .map((name) => {
-            // Ép kiểu số cho tiền nợ của từng người, nếu NaN thì hiện 0
-            const amount = isNaN(individualDebts[name])
-              ? 0
-              : individualDebts[name];
+            const spent = individualDebts[name] || 0;
+            return `
+            <div class="flex justify-between items-center py-1 border-b border-orange-100 italic">
+                <span class="text-slate-600">${name}:</span>
+                <span class="font-bold text-slate-900">${Math.round(
+                  spent
+                ).toLocaleString()}đ</span>
+            </div>`;
+          })
+          .join("");
+
+        // --- PHẦN 2: ĐỐI SOÁT TÀI CHÍNH (KHÔNG CÓ TÊN ANH) ---
+        let settlingHtml = friends
+          .map((name) => {
+            const totalDebt = individualDebts[name] || 0;
+            const paidDebt = actualPaidFromPocket[name] || 0;
+
+            const currentDebt = totalDebt - PAID_BEFORE;
+
+            // Công thức chuẩn: Gốc + Ứng - Nợ
+            const balance = CASH_REMAINING + paidDebt - currentDebt;
+
+            const isPositive = balance >= 0;
+            const color = isPositive ? "text-green-400" : "text-red-400";
+            const sign = isPositive ? "+" : "";
 
             return `
-        <div class="flex justify-between items-center py-1 border-b border-orange-100 italic">
-            <span class="text-slate-800">${name}:</span>
-            <span class="font-bold text-slate-900">${Math.round(
-              amount
+            <div class="flex justify-between items-center py-3 border-b border-slate-800 px-2">
+                <span class="text-slate-300 font-medium">${name}:</span>
+                <div class="text-right">
+                    <span class="font-black ${color} text-lg">${sign}${Math.round(
+              balance
             ).toLocaleString()}đ</span>
-        </div>
-      `;
+                    ${
+                      paidDebt > 0
+                        ? `<div class="text-[9px] text-slate-500 italic uppercase tracking-tighter">Đã ứng: ${Math.round(
+                            paidDebt
+                          ).toLocaleString()}đ</div>`
+                        : ""
+                    }
+                </div>
+            </div>`;
           })
           .join("");
 
         tfoot.innerHTML = `
-    <tr>
-        <td colspan="4" class="py-6 text-right font-serif italic text-xl text-slate-800 pr-10">
-            Tổng cộng:
-        </td>
-        <td colspan="2" class="py-6 text-right">
-             <span class="text-2xl text-orange-600 font-bold">${Math.round(
-               safeTotal
-             ).toLocaleString()}đ</span>
-        </td>
-    </tr>
-    <tr>
-        <td colspan="6" class="bg-orange-50/50 rounded-3xl p-6">
-            <div class="text-[11px] font-black uppercase tracking-widest text-orange-800 mb-3 text-center">Số tiền mỗi người phải đóng</div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">
-                ${debtHtml}
-            </div>
-        </td>
-    </tr>
-  `;
+        <tr>
+            <td colspan="4" class="py-8 text-right font-serif italic text-2xl text-slate-800 pr-10">Tổng chi cả nhóm:</td>
+            <td colspan="2" class="py-8 text-right px-4">
+                <span class="text-3xl text-orange-600 font-black">${Math.round(
+                  totalGroup
+                ).toLocaleString()}đ</span>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="6" class="bg-orange-50/50 rounded-[2rem] p-8">
+                <div class="text-[11px] font-black uppercase tracking-[0.2em] text-orange-800 mb-4 text-center italic">
+                    Chi phí thực tế mỗi người đã tiêu
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
+                    ${spendingHtml}
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="6" class="p-0">
+                <div class="bg-slate-900 rounded-[2.5rem] p-10 mt-10 shadow-2xl border border-slate-800">
+                    <div class="text-center mb-8">
+                        <h3 class="text-white italic text-3xl tracking-wide font-medium">Bảng đối soát tài chính</h3>
+                        <p class="text-[10px] text-slate-100 uppercase tracking-[0.3em] mt-3 italic font-medium">Kết quả dựa trên quỹ đóng 8.529.112đ</p>
+                        <p class="text-[10px] text-slate-300 uppercase tracking-[0.3em] mt-3 italic font-medium">Đối soát với Hoàng Anh (cầm quỹ)</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16">
+                        ${settlingHtml}
+                    </div>
+
+                    <div class="mt-10 flex flex-col md:flex-row items-center justify-center gap-6 border-t border-slate-800 pt-8">
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
+                            <span class="text-[11px] text-slate-300 font-bold uppercase tracking-widest italic">Số Dương (+): Hoàng Anh trả lại</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
+                            <span class="text-[11px] text-slate-300 font-bold uppercase tracking-widest italic">Số Âm (-): Nộp thêm cho Hoàng Anh</span>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    `;
       }
 
       // Hàm play music
@@ -1576,6 +1655,13 @@
               .join("");
             contentHtml += `<section id="day-${idx}" class="scroll-mt-48"><div class="mb-10 pl-6 border-l-[6px] border-green-800"><h2 class="font-serif text-5xl text-slate-900 italic font-bold">${day.day}: ${day.title}</h2></div><div class="grid gap-12">${activitiesHtml}</div></section>`;
           });
+
+          tabsHtml += `
+    <button onclick="scrollToExpense()" class="flex-shrink-0 px-8 py-3.5 rounded-2xl bg-orange-100 border border-orange-200 text-orange-700 font-black text-sm hover:bg-orange-600 hover:text-white transition-all shadow-sm">
+        <i class="fas fa-wallet mr-2"></i>Chi tiêu thực
+    </button>
+`;
+
           document.getElementById("day-tabs").innerHTML = tabsHtml;
           document.getElementById("itinerary-list").innerHTML = contentHtml;
 
@@ -1599,6 +1685,26 @@
           );
         } catch (e) {
           console.error(e);
+        }
+      }
+
+      function scrollToExpense() {
+        const section = document.getElementById("expense-section");
+        if (section) {
+          // Hiện bảng nếu đang bị ẩn
+          section.classList.remove("hidden");
+          // Cuộn xuống mượt mà
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+
+          // Hiệu ứng "highlight" nhẹ để người dùng biết đã cuộn tới nơi
+          section.classList.add("ring-2", "ring-orange-500", "ring-offset-4");
+          setTimeout(() => {
+            section.classList.remove(
+              "ring-2",
+              "ring-orange-500",
+              "ring-offset-4"
+            );
+          }, 2000);
         }
       }
 
