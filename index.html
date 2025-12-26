@@ -214,12 +214,18 @@
               class="text-[10px] font-black uppercase text-slate-800 ml-2 mb-1 block"
               >Người chi trả</label
             >
-            <input
-              type="text"
+            <select
               id="ex-payer"
-              placeholder="Tên người trả..."
-              class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-orange-500 outline-none transition"
-            />
+              class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer appearance-none"
+            >
+              <option value="" disabled selected>Chọn người trả...</option>
+              <option value="Anh">Anh</option>
+              <option value="Lâm">Lâm</option>
+              <option value="Minh">Minh</option>
+              <option value="Thu">Thu</option>
+              <option value="Ngọc">Ngọc</option>
+              <option value="Linh">Linh</option>
+            </select>
           </div>
           <div>
             <label
@@ -274,7 +280,7 @@
                   checked
                   class="rounded text-orange-500 focus:ring-orange-500"
                 />
-                Thuỳ Linh
+                Linh
               </label>
               <label
                 class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer"
@@ -285,7 +291,7 @@
                   checked
                   class="rounded text-orange-500 focus:ring-orange-500"
                 />
-                Ngọc Lâm
+                Lâm
               </label>
               <label
                 class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer"
@@ -296,7 +302,7 @@
                   checked
                   class="rounded text-orange-500 focus:ring-orange-500"
                 />
-                Bảo Ngọc
+                Ngọc
               </label>
               <label
                 class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer"
@@ -307,7 +313,7 @@
                   checked
                   class="rounded text-orange-500 focus:ring-orange-500"
                 />
-                Thanh Thu
+                Thu
               </label>
               <label
                 class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer"
@@ -318,7 +324,7 @@
                   checked
                   class="rounded text-orange-500 focus:ring-orange-500"
                 />
-                Khánh Minh
+                Minh
               </label>
             </div>
           </div>
