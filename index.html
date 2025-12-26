@@ -732,7 +732,7 @@
 
       async function addExpense() {
         const time = document.getElementById("ex-time").value;
-        const payer = document.getElementById("ex-payer").value;
+        const payer = document.getElementById("ex-payer").value.trim();
         const content = document.getElementById("ex-content").value;
         const amountInput = document.getElementById("ex-amount").value;
         const amount = parseFloat(amountInput);
@@ -742,7 +742,13 @@
         );
         const participants = Array.from(checkboxes).map((cb) => cb.value);
 
-        if (!time || !payer || isNaN(amount) || participants.length === 0) {
+        if (
+          !time ||
+          !payer ||
+          isNaN(amount) ||
+          amount <= 0 ||
+          participants.length === 0
+        ) {
           alert("Vui lòng nhập đủ thông tin nhé!");
           return;
         }
@@ -881,59 +887,60 @@
         actualPaidFromPocket,
         tfoot
       ) {
-        const PAID_BEFORE = 4529112; // Số tiền đã đóng (vé máy bay, phòng...)
-        const CASH_REMAINING = 4000000; // Số tiền mặt đóng thêm cho Anh
+        const PAID_BEFORE = 4529112; // Phần đã quyết toán xong
+        const CASH_REMAINING = 4000000; // Tiền mặt đưa Anh cầm
 
-        // Danh sách đầy đủ cho bảng chi phí
         const allMembers = Object.keys(individualDebts);
-        // Danh sách 5 người cho bảng đối soát (Loại bỏ Anh)
         const friends = allMembers.filter((name) => name !== "Anh");
 
-        // --- PHẦN 1: CHI PHÍ CÁ NHÂN (CÓ TÊN ANH) ---
+        // --- PHẦN 1: CHI PHÍ CÁ NHÂN ---
         let spendingHtml = allMembers
           .map((name) => {
             const spent = individualDebts[name] || 0;
             return `
-            <div class="flex justify-between items-center py-1 border-b border-orange-100 italic">
-                <span class="text-slate-600">${name}:</span>
-                <span class="font-bold text-slate-900">${Math.round(
-                  spent
-                ).toLocaleString()}đ</span>
-            </div>`;
+        <div class="flex justify-between items-center py-1 border-b border-orange-100 italic">
+            <span class="text-slate-600">${name}:</span>
+            <span class="font-bold text-slate-900">${Math.round(
+              spent
+            ).toLocaleString()}đ</span>
+        </div>`;
           })
           .join("");
 
-        // --- PHẦN 2: ĐỐI SOÁT TÀI CHÍNH (KHÔNG CÓ TÊN ANH) ---
+        // --- PHẦN 2: ĐỐI SOÁT TÀI CHÍNH ---
         let settlingHtml = friends
           .map((name) => {
             const totalDebt = individualDebts[name] || 0;
-            const paidDebt = actualPaidFromPocket[name] || 0;
+            const paidOut = actualPaidFromPocket[name] || 0;
 
-            const currentDebt = totalDebt - PAID_BEFORE;
+            // Nợ phát sinh thực tế = Tổng nợ cả tour - 4.5tr đã đóng trước
+            // Nếu tiêu dưới 4.5tr, số này sẽ âm (tức là vẫn còn dư tiền trong quỹ cũ)
+            const currentDebtToCash = totalDebt - PAID_BEFORE;
 
-            // Công thức chuẩn: Gốc + Ứng - Nợ
-            const balance = CASH_REMAINING + paidDebt - currentDebt;
+            // Số dư cuối cùng với Anh:
+            // (4tr đóng thêm) + (Tiền mình đã ứng trả hộ) - (Nợ lạm vào quỹ mặt)
+            const balance = CASH_REMAINING + paidOut - currentDebtToCash;
 
             const isPositive = balance >= 0;
             const color = isPositive ? "text-green-400" : "text-red-400";
             const sign = isPositive ? "+" : "";
 
             return `
-            <div class="flex justify-between items-center py-3 border-b border-slate-800 px-2">
-                <span class="text-slate-300 font-medium">${name}:</span>
-                <div class="text-right">
-                    <span class="font-black ${color} text-lg">${sign}${Math.round(
+        <div class="flex justify-between items-center py-3 border-b border-slate-800 px-2">
+            <span class="text-slate-300 font-medium">${name}:</span>
+            <div class="text-right">
+                <span class="font-black ${color} text-lg">${sign}${Math.round(
               balance
             ).toLocaleString()}đ</span>
-                    ${
-                      paidDebt > 0
-                        ? `<div class="text-[9px] text-slate-500 italic uppercase tracking-tighter">Đã ứng: ${Math.round(
-                            paidDebt
-                          ).toLocaleString()}đ</div>`
-                        : ""
-                    }
-                </div>
-            </div>`;
+                ${
+                  paidOut > 0
+                    ? `<div class="text-[9px] text-slate-500 italic uppercase">Đã ứng: ${Math.round(
+                        paidOut
+                      ).toLocaleString()}đ</div>`
+                    : ""
+                }
+            </div>
+        </div>`;
           })
           .join("");
 
@@ -946,39 +953,28 @@
                 ).toLocaleString()}đ</span>
             </td>
         </tr>
-
         <tr>
             <td colspan="6" class="bg-orange-50/50 rounded-[2rem] p-8">
-                <div class="text-[11px] font-black uppercase tracking-[0.2em] text-orange-800 mb-4 text-center italic">
-                    Chi phí thực tế mỗi người đã tiêu
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
-                    ${spendingHtml}
-                </div>
+                <div class="text-[11px] font-black uppercase tracking-[0.2em] text-orange-800 mb-4 text-center italic">Chi phí thực tế mỗi người đã tiêu</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">${spendingHtml}</div>
             </td>
         </tr>
-
         <tr>
             <td colspan="6" class="p-0">
                 <div class="bg-slate-900 rounded-[2.5rem] p-10 mt-10 shadow-2xl border border-slate-800">
                     <div class="text-center mb-8">
-                        <h3 class="text-white italic text-3xl tracking-wide font-medium">Bảng đối soát tài chính</h3>
-                        <p class="text-[10px] text-slate-100 uppercase tracking-[0.3em] mt-3 italic font-medium">Kết quả dựa trên quỹ đóng 8.529.112đ</p>
-                        <p class="text-[10px] text-slate-300 uppercase tracking-[0.3em] mt-3 italic font-medium">Đối soát với Hoàng Anh (cầm quỹ)</p>
+                        <h3 class="text-white italic text-3xl tracking-wide font-medium">Bảng đối soát tiền mặt</h3>
+                        <p class="text-[10px] text-slate-300 uppercase tracking-[0.3em] mt-3 italic font-medium">Đối soát với Anh (Dựa trên 4tr đóng thêm)</p>
                     </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16">
-                        ${settlingHtml}
-                    </div>
-
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16">${settlingHtml}</div>
                     <div class="mt-10 flex flex-col md:flex-row items-center justify-center gap-6 border-t border-slate-800 pt-8">
                         <div class="flex items-center gap-3">
-                            <div class="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
-                            <span class="text-[11px] text-slate-300 font-bold uppercase tracking-widest italic">Số Dương (+): Hoàng Anh trả lại</span>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            <span class="text-[11px] text-slate-300 font-bold uppercase italic">Số Dương (+): Anh trả lại</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
-                            <span class="text-[11px] text-slate-300 font-bold uppercase tracking-widest italic">Số Âm (-): Nộp thêm cho Hoàng Anh</span>
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <span class="text-[11px] text-slate-300 font-bold uppercase italic">Số Âm (-): Nộp thêm cho Anh</span>
                         </div>
                     </div>
                 </div>
