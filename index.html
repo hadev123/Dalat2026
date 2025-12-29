@@ -694,24 +694,25 @@
           }
         }
 
-        // Khi kéo từ Cloud về cũng bật loading
-        if (expenses.length > 0) toggleTableLoading(true);
-
-        try {
-          const response = await fetch(SCRIPT_URL);
-          const cloudData = await response.json();
-          if (cloudData && cloudData.length > 0) {
-            expenses = cloudData;
-            localStorage.setItem("tripExpenses", JSON.stringify(expenses));
-            updateExpenseTable();
-            document
-              .getElementById("expense-section")
-              .classList.remove("hidden");
+        // Chỉ kéo từ Cloud về nếu LocalStorage trống (để tránh bị hiện lại dòng đã xóa)
+        if (!savedData) {
+          toggleTableLoading(true);
+          try {
+            const response = await fetch(SCRIPT_URL);
+            const cloudData = await response.json();
+            if (cloudData && cloudData.length > 0) {
+              expenses = cloudData;
+              localStorage.setItem("tripExpenses", JSON.stringify(expenses));
+              updateExpenseTable();
+              document
+                .getElementById("expense-section")
+                .classList.remove("hidden");
+            }
+          } catch (e) {
+            console.warn("Cloud trống hoặc lỗi kết nối");
+          } finally {
+            toggleTableLoading(false);
           }
-        } catch (e) {
-          console.warn("Cloud trống");
-        } finally {
-          toggleTableLoading(false);
         }
       };
 
@@ -782,6 +783,10 @@
 
         tbody.innerHTML = "";
 
+        // Lọc bỏ những dòng đã đánh dấu xóa
+        // (Dùng !! để ép kiểu về boolean, đảm bảo lọc đúng)
+        const activeExpenses = expenses.filter((item) => !item.isDeleted);
+
         let totalGroup = 0;
         let individualDebts = {
           Anh: 0,
@@ -791,7 +796,6 @@
           Thu: 0,
           Minh: 0,
         };
-
         let actualPaidFromPocket = {
           Anh: 0,
           Linh: 0,
@@ -801,20 +805,16 @@
           Minh: 0,
         };
 
-        expenses.forEach((item, index) => {
+        activeExpenses.forEach((item, indexInActive) => {
+          const originalIndex = expenses.indexOf(item);
           const amount = parseFloat(item.amount) || 0;
           totalGroup += amount;
 
-          // Ghi nhận ai là người đã rút ví trả
           if (actualPaidFromPocket.hasOwnProperty(item.payer)) {
             actualPaidFromPocket[item.payer] += amount;
           }
 
-          // Chia nợ cho những người tham gia
-          const shareCount =
-            item.participants && item.participants.length > 0
-              ? item.participants.length
-              : 1;
+          const shareCount = item.participants?.length || 1;
           const perPerson = amount / shareCount;
 
           if (item.participants) {
@@ -825,11 +825,10 @@
             });
           }
 
-          // Vẽ hàng trong bảng
           tbody.innerHTML += `
             <tr class="border-b border-slate-100 group hover:bg-white/40 transition">
                 <td class="py-4 px-2 text-slate-600 text-[10px]">${
-                  index + 1
+                  indexInActive + 1
                 }</td>
                 <td class="text-xs font-bold text-slate-800">${
                   item.time || ""
@@ -847,36 +846,37 @@
                         }
                     </div>
                 </td>
-                <td class="text-right font-bold text-orange-600">
-                    ${amount.toLocaleString()}đ
-                </td>
+                <td class="text-right font-bold text-orange-600">${amount.toLocaleString()}đ</td>
                 <td class="text-center px-4">
-                    <button onclick="deleteExpense(${index})" class="text-red-400 hover:text-red-600 transition">
+                    <button onclick="deleteExpense(${originalIndex})" class="text-red-400 hover:text-red-600 transition">
                         <i class="fas fa-trash-alt text-sm"></i>
                     </button>
                 </td>
-            </tr>
-        `;
+            </tr>`;
         });
 
-        // Gọi hàm render footer (nhớ truyền các giá trị đã tính toán)
+        // Ẩn/Hiện section dựa trên dữ liệu thực tế
+        const section = document.getElementById("expense-section");
+        if (activeExpenses.length === 0) {
+          section.classList.add("hidden");
+        } else {
+          section.classList.remove("hidden");
+        }
+
         renderFooter(totalGroup, individualDebts, actualPaidFromPocket, tfoot);
       }
 
       // Hàm xoá hàng
       async function deleteExpense(index) {
-        if (confirm("Xóa nhé?")) {
+        if (confirm("Bạn có xoá mục này khỏi bảng không ???")) {
+          // 1. Xóa hẳn khỏi mảng đang hiển thị
           expenses.splice(index, 1);
 
-          // Cập nhật giao diện ngay
+          // 2. Cập nhật giao diện ngay lập tức
           updateExpenseTable();
-          if (expenses.length === 0) {
-            document.getElementById("expense-section").classList.add("hidden");
-          }
 
-          // Sau đó mới lưu và đồng bộ
+          // 3. Ghi đè vào LocalStorage để F5 không bị hiện lại
           localStorage.setItem("tripExpenses", JSON.stringify(expenses));
-          await syncToGoogleSheets();
         }
       }
 
@@ -970,11 +970,11 @@
                     <div class="mt-10 flex flex-col md:flex-row items-center justify-center gap-6 border-t border-slate-800 pt-8">
                         <div class="flex items-center gap-3">
                             <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                            <span class="text-[11px] text-slate-300 font-bold uppercase italic">Số Dương (+): Anh trả lại</span>
+                            <span class="text-[11px] text-slate-300 font-bold uppercase italic">Số Dương (+): Hoàng Anh trả lại</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                            <span class="text-[11px] text-slate-300 font-bold uppercase italic">Số Âm (-): Nộp thêm cho Anh</span>
+                            <span class="text-[11px] text-slate-300 font-bold uppercase italic">Số Âm (-): Nộp thêm cho Hoàng Anh</span>
                         </div>
                     </div>
                 </div>
@@ -1113,7 +1113,7 @@
       fetchDalatWeather();
 
       const initialData = {
-        total: "7,859,800 VNĐ",
+        total: "7,674,800 VNĐ",
         footerImg:
           "https://drive.google.com/file/d/1E_MGlNVnajskGqxNQwGtVlEaG2OOwUgR/view?usp=sharing",
         team: {
@@ -1165,27 +1165,27 @@
           },
           {
             name: "Xe máy & Xăng",
-            amount: "300,000 VNĐ",
+            amount: "275,000 VNĐ",
             icon: "fa-motorcycle",
-            desc: "Thuê 3 xe + Xăng xe",
+            desc: "Thuê 3 xe máy + Xăng xe",
           },
           {
             name: "Ô tô & Taxi",
-            amount: "840,000 VNĐ",
+            amount: "380,000 VNĐ",
             icon: "fa-car-side",
-            desc: "Xe Lado 7 chỗ, xe đưa đón sân bay",
+            desc: "Xe Vf34, Lado 7 chỗ, xe đưa đón sân bay",
           },
           {
             name: "Ăn uống",
-            amount: "1,300,000 VNĐ",
+            amount: "1,810,000 VNĐ",
             icon: "fa-utensils",
-            desc: "Sáng, trưa, tối, cafe, kem bơ",
+            desc: "Ăn sáng, lẩu nướng, kem bơ, cafe,...",
           },
           {
             name: "Vé tham quan",
-            amount: "890,000 VNĐ",
+            amount: "730,000 VNĐ",
             icon: "fa-ticket",
-            desc: "Mongo, Lumiere, Săn mây, Datanla, Dinh 3",
+            desc: "Mongo, Lumiere, Săn mây, Thác Datanla, Suối bình yên, Dinh 3 Bảo Đại",
           },
         ],
         days: [
@@ -1210,7 +1210,7 @@
                 icon: "fa-motorcycle",
                 title: "Ăn Cà ri Chàaa",
                 note: "32 Đường Ánh Sáng",
-                detail: "Di chuyển bằng Xe máy. Check-in tháp Vinaphone",
+                detail: "Di chuyển bằng Ô tô. Check-in tháp Vinaphone",
                 cost: "100.000",
                 image:
                   "https://drive.google.com/file/d/1OJ84eEemI4m7CX7688VLZQ6-r2tuImhx/view?usp=sharing?w=1000",
@@ -1240,9 +1240,10 @@
                 type: "play",
                 icon: "fa-car-side",
                 title: "Mongo Land",
-                note: "Xe ô tô đưa đón (Bao gồm vé + xe).",
-                detail: "Di chuyển bằng Ô tô đưa đón tận nơi.",
-                cost: "500.000",
+                note: "120k/vé + xe 390k/chiều",
+                detail:
+                  "Vé +1 nước, mang đồ ăn vào, các trò chơi ko giới hạn. Go kart thì thêm 150,000",
+                cost: "300.000",
                 image:
                   "https://agotourist.com/wp-content/uploads/2022/08/tro-choi-truot-phao-kho-tai-mongo-land.jpg?w=1000",
                 map: "https://maps.app.goo.gl/B9qNvWc9ZsXodHzf6",
@@ -1289,7 +1290,7 @@
                 icon: "fa-motorcycle",
                 title: "Ăn tối Trạm Dừng Chill",
                 note: "111 Huỳnh Tấn Phát, Phường 11, Đà Lạt",
-                detail: "Di chuyển bằng Xe máy.",
+                detail: "Di chuyển bằng Xe máy. Đã đặt bàn",
                 cost: "250.000",
                 image:
                   "https://xedulichdalat.vn/wp-content/uploads/2025/02/tiem-nuong-tram-dung-chill-6.jpg?w=1000",
@@ -1302,7 +1303,7 @@
                 title: "Ăn sữa chua, kem bơ",
                 note: "Kem Bơ Đà Lạt - Kem Bơ Na Ri, 74C Nguyễn Văn Trỗi, Phường 2, Đà Lạt, Lâm Đồng",
                 detail: "Di chuyển bằng Xe máy.",
-                cost: "250.000",
+                cost: "30.000",
                 image:
                   "https://static.vinwonders.com/production/kem-bo-da-lat-so-4.jpg?w=1000",
                 map: "https://maps.app.goo.gl/bfHXX8tHMsZP4kW28",
@@ -1315,12 +1316,12 @@
             title: "Chillnfree",
             activities: [
               {
-                time: "03:30 - 08:00",
+                time: "04:00 - 08:00",
                 icon: "fa-car-side",
                 title: "Săn mây Cầu Gỗ",
                 note: "Đón tại khách sạn, bao gồm tham quan và ăn sáng",
-                detail: "Di chuyển bằng Ô tô.",
-                cost: "180.000",
+                detail: "Di chuyển bằng Ô tô. Đã đặt tour",
+                cost: "200.000",
                 image:
                   "https://latour.vn/upload/product/tour-san-may-don-binh-minh-da-lat-745.jpg?w=1000",
               },
@@ -1328,8 +1329,8 @@
                 time: "12:00 - 14:00",
                 icon: "fa-car-side",
                 title: "Ăn trưa Pizza Củi",
-                note: "Pizza Củi - Võ Trường Toản (Cách Hotel 5km)",
-                detail: "Di chuyển bằng Ô tô.",
+                note: "Pizza Củi - Võ Trường Toản",
+                detail: "Di chuyển bằng Ô tô  (Cách Hotel 5km)",
                 cost: "100.000",
                 image:
                   "https://drive.google.com/file/d/1maB0r-hA7LxYNMdTt8GAsNDZF2_dp1gU/view?usp=sharing?w=1000",
@@ -1361,9 +1362,9 @@
                 time: "19:00 - 21:00",
                 icon: "fa-motorcycle",
                 title: "Lẩu gà lá é",
-                note: "Lẩu gá lá É - Số 7 Tô Hiến Thành (Linh không ăn được lá É và măng)",
+                note: "Lẩu gá lá É - Số 7 Tô Hiến Thành (Linh ăn cơm tấm)",
                 detail: "Di chuyển bằng Xe máy.",
-                cost: "200.000",
+                cost: "150.000",
                 image:
                   "https://vietmaptravel.vn/wp-content/uploads/2025/04/lau-ga-la-e-da-lat-avt.jpeg?w=1000",
                 map: "https://maps.app.goo.gl/KxAGvd2MEPPpGmco7",
@@ -1393,8 +1394,8 @@
                 icon: "fa-car-side",
                 title: "Thác Datanla",
                 note: "Cách Hotel 7km",
-                detail: "Di chuyển bằng Ô tô",
-                cost: "200.000",
+                detail: "Di chuyển bằng Ô tô. 50k/vé vào cửa + 120k xe/chiều",
+                cost: "100.000",
                 image:
                   "https://agotourist.com/wp-content/uploads/2019/03/he-thong-mang-truot-tai-thac-datanla.jpg?w=1000",
                 map: "https://maps.app.goo.gl/2gFA3zHom8YhYRAx7",
@@ -1405,8 +1406,9 @@
                 icon: "fa-car-side",
                 title: "Ăn trưa Suối bình yên",
                 note: "Cách Hotel 7km",
-                detail: "Di chuyển bằng Ô tô",
-                cost: "200.000",
+                detail:
+                  "Di chuyển bằng Ô tô. 50k/xe + 150k/vé (bao gồm Vườn Địa Đàng và Suối Bình Yên) + 200k/ăn trưa tại suối bình yên",
+                cost: "400.000",
                 image:
                   "https://hoadalattravel.vn/wp-content/uploads/2024/11/suoi-binh-yen-da-lat-1.jpeg?w=1000",
                 map: "https://maps.app.goo.gl/eV9vSJqTjDZidLWu8",
@@ -1467,7 +1469,7 @@
             title: "Comeback home",
             activities: [
               {
-                time: "07:30 - 09:00",
+                time: "06:30 - 07:00",
                 type: "eat",
                 icon: "fa-motorcycle",
                 title: "Ăn sáng Bánh cuốn",
@@ -1499,7 +1501,7 @@
             title: "những nơi khác",
             activities: [
               {
-                time: "Rảnh là đi",
+                time: "Rảnh thì đi",
                 type: "eat",
                 icon: "fa-motorcycle",
                 title: "Sữa đậu nành nóng",
@@ -1511,7 +1513,7 @@
                 map: "https://maps.app.goo.gl/JRpt922exuaHjxEM9",
               },
               {
-                time: "Rảnh là đi",
+                time: "Rảnh thì đi",
                 type: "eat",
                 icon: "fa-motorcycle",
                 title: "Xưởng Bánh SweetHeart",
@@ -1523,7 +1525,7 @@
                 map: "https://maps.app.goo.gl/NQTn6hX7zeZcaJLa8",
               },
               {
-                time: "Rảnh là đi",
+                time: "Rảnh thì đi",
                 type: "eat",
                 icon: "fa-motorcycle",
                 title: "Ăn gà nướng, cơm lam",
