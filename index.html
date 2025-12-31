@@ -203,10 +203,10 @@
               >Thời gian</label
             >
             <input
-              type="text"
+              type="date"
               id="ex-time"
-              placeholder="Ví dụ: 01-01-2026"
-              class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-orange-500 outline-none transition"
+              placeholder="01-01-2026"
+              class="w-full px-5 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-orange-500 outline-none transition cursor-pointer"
             />
           </div>
           <div>
@@ -681,6 +681,18 @@
         }
       }
 
+      //Convert Datetime
+      function formatDate(dateStr) {
+        if (!dateStr) return "";
+        // Nếu dateStr có dạng YYYY-MM-DD (từ input date)
+        if (dateStr.includes("-")) {
+          const [year, month, day] = dateStr.split("-");
+          // Nếu phần đầu là năm (4 chữ số) thì mới đảo
+          if (year.length === 4) return `${day}-${month}-${year}`;
+        }
+        return dateStr; // Trả về nguyên bản nếu đã đúng định dạng
+      }
+
       // Form điền tiền thực
       window.onload = async function () {
         const savedData = localStorage.getItem("tripExpenses");
@@ -831,7 +843,7 @@
                   indexInActive + 1
                 }</td>
                 <td class="text-xs font-bold text-slate-800">${
-                  item.time || ""
+                  formatDate(item.time) || ""
                 }</td>
                 <td class="text-sm font-black text-slate-800">${
                   item.payer || ""
